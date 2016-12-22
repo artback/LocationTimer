@@ -4,10 +4,6 @@ apply plugin: 'com.neenbedankt.android-apt'
 android {
     signingConfigs {
         config {
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
-            storeFile file('/home/freak/.android/debug.keystore')
-            storePassword 'android'
         }
     }
     compileSdkVersion 25
