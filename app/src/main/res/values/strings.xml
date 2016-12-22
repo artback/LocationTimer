@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">LocationTimer</string>
+    <string name="deleteevent">Delete Calendar</string>
+    <string name="warningmessage">Are you sure you want to delete this Calender?</string>
+    <string name="geofence_enter">Started timer: %1$s at %2$s</string>
+    <string name="geofence_manuellt">Manually started timer:  %1$s at %2$s</string>
+    <string name="geofence_manuellt_stoped">Manually stopped timer:  %1$s at %2$s</string>
+    <string name="geofence_exit">Stopped timer: %1$s at %2$s</string>
+    <string name="geofence_not_available">Geofence service is not available now</string>
+    <string name="geofence_too_many_geofences">App registered too many geofences</string>
+    <string name="geofence_too_many_pending_intents">Too many PendingIntents provided</string>
+    <string name="unknown_geofence_error">Unknown error</string>
+    <string name="loading_address">Loading Address</string>
+    <string name="waiting_for_location">Waiting for current location</string>
+    <string name="place_added">Place added</string>
+    <string name="meters">Meter</string>
+    <string name="new_message">new message</string>
+    <string name="new_messages">new messages</string>
+    <string name="enter_place_title">Enter place title</string>
+    <string name="add_place">add place</string>
+    <string name="Local">Local</string>
+    <string name="Location">Location</string>
+    <string name="failure" translatable="false">Faliure</string>
+</resources>

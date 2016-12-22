@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/my_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="4dp"
+    android:background="@android:color/black"
+    android:layout_alignParentStart="true">
+ <TextView
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content"
+  android:id="@+id/my_toolbartext"
+  android:text="@string/app_name"
+     android:textSize="24sp" />
+
+    <ImageButton
+        android:layout_margin="10dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/delete"
+        android:background="@null"
+        android:id="@+id/my_remove"
+        android:onClick="onclick"
+        android:layout_gravity="right"/>
+    <ImageButton
+        android:layout_margin="0dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/ic_play_arrow_white_40dp"
+        android:background="@null"
+        android:id="@+id/my_playbutton"
+        android:onClick="onclick"
+        android:layout_gravity="right"/>
+
+ <TextView
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:id="@+id/my_time"
+     android:text=""
+     android:textSize="24sp"
+     android:layout_marginRight="5dp"
+     android:layout_gravity="right" />
+ </android.support.v7.widget.Toolbar>

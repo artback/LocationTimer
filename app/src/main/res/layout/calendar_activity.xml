@@ -1,0 +1,28 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="true"
+                android:background="@android:color/black"
+                tools:context="com.artback.bth.locationtimer.ui.CalendarActivity"
+                android:clickable="true">
+    <include
+        android:id="@+id/playtoolbar"
+        layout="@layout/toolbar_play"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent" />
+
+        <LinearLayout
+            android:id="@+id/calendar1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@+id/playtoolbar">
+        </LinearLayout>
+
+    <TextView
+        android:id="@+id/textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/playtoolbar"/>
+</RelativeLayout>

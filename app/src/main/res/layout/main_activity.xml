@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:fitsSystemWindows="true"
+android:orientation="vertical">
+<include
+    android:id="@+id/my_toolbar"
+    layout="@layout/toolbar_base" />
+
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                     xmlns:tools="http://schemas.android.com/tools"
+                                     android:layout_width="match_parent"
+                                     android:layout_height="match_parent"
+                                     android:fitsSystemWindows="true"
+                                     tools:context="com.artback.bth.locationtimer.ui.Main.MainActivity"
+                                     android:clickable="true">
+
+        <include layout="@layout/location_list_page" />
+
+        <ImageButton
+            android:layout_margin="15dp"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@drawable/ic_add_white_24dp"
+            android:background="@drawable/circle"
+            android:id="@+id/imageButton"
+            android:onClick="openAddPage"
+            android:layout_gravity="right|bottom" />
+
+    </android.support.design.widget.CoordinatorLayout>
+
+<!-- Layout for content is here. This can be a RelativeLayout  -->
+
+</LinearLayout>

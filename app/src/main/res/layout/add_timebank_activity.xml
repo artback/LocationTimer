@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/caldroid_black"
+    android:orientation="vertical"
+    android:weightSum="9" >
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/toolbar_base" />
+
+    <RelativeLayout
+        android:id="@+id/rlAddPlaceContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:padding="@dimen/padding_add_place_container" >
+
+        <EditText
+            android:id="@+id/edtTitle"
+            android:textSize="35sp"
+            android:background="@color/caldroid_black"
+            android:textCursorDrawable="@color/BloodRed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/margin_add_place_text_bottom"
+            android:layout_marginTop="@dimen/margin_add_place_text_top"
+            android:hint="@string/enter_place_title"
+            android:imeOptions="actionNext"
+            android:inputType="text"
+            android:maxLines="1"/>
+
+
+        <RelativeLayout
+            android:id="@+id/rlGeofenceContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/edtTitle" >
+
+            <TextView
+                android:id="@+id/edtRadius"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="20dp"
+                android:layout_marginStart="@dimen/margin_left_add_place_enter_radius_left"
+                android:layout_toStartOf="@+id/txtMeters"
+                android:gravity="end"
+                android:inputType="numberSigned"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium" />
+            <TextView
+                android:id="@+id/txtMeters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/margin_left_add_place_enter_radius_left"
+                android:gravity="center"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="@string/meters"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small" />
+        </RelativeLayout>
+        <TextView
+            android:id="@+id/txtAddress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/btnDone"
+            android:layout_below="@id/rlGeofenceContainer"
+            android:layout_marginBottom="@dimen/margin_add_place_address_bottom"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="3"
+            android:text="@string/loading_address"
+            android:textSize="20sp" />
+        <Button
+            android:id="@+id/btnDone"
+            style="@style/Widget.AppCompat.Button"
+            android:layout_width="150dp"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:padding="@dimen/padding_add_place_done"
+            android:background="@color/BloodRed"
+            android:text="@string/add_place" />
+    </RelativeLayout>
+
+
+</LinearLayout>

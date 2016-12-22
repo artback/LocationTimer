@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.artback.bth.locationtimer">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:name=".app.PlacesApplication"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.NoActionBar">
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyC_yOtLx_E1ZQlFqn3LuTccj0cwd3q3fKE" />
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+        <activity
+            android:name="com.artback.bth.locationtimer.ui.Main.MainActivity"
+            android:screenOrientation="portrait"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.artback.bth.locationtimer.ui.CalendarActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.Main.MainActivity"/>
+        </activity>
+        <activity
+            android:name="com.artback.bth.locationtimer.ui.MapActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
+        </activity>
+        <activity
+            android:name="com.artback.bth.locationtimer.ui.AddPlaceActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
+        </activity>
+        <activity
+            android:name="com.artback.bth.locationtimer.ui.Local_LocationActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
+        </activity>
+        <service
+            android:name="com.artback.bth.locationtimer.Geofence.GeolocationService"
+            android:exported="false">
+        </service>
+        <service
+            android:name="com.artback.bth.locationtimer.Calendar.GoogleCalendarService"
+            android:exported="false">
+        </service>
+        <receiver
+            android:name="com.artback.bth.locationtimer.Geofence.AtBootReceiver"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.location.MODE_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.artback.bth.locationtimer.Geofence.NotificationBroadCastReceiver"
+            android:exported="false" >
+        </receiver>
+        <receiver android:name="com.artback.bth.locationtimer.Geofence.GeofenceReceiver"
+                  android:exported="false">
+            <intent-filter >
+                <action android:name="com.artback.geofence.ACTION_RECEIVE_GEOFENCE"/>
+            </intent-filter>
+        </receiver>
+         </application>
+</manifest>

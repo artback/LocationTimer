@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:background="@color/caldroid_black"
+                android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        layout="@layout/toolbar_base" />
+
+    <Button
+        android:text="@string/Local"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="150dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="122dp"
+        android:id="@+id/location_button"
+        android:layout_below="@+id/toolbar"
+        android:background="@color/BloodRed"
+        android:onClick="onLocalClick"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:text="@string/Location"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="150dp"
+        android:layout_height="60dp"
+        android:id="@+id/local_button"
+        android:layout_marginTop="114dp"
+        android:layout_below="@+id/location_button"
+        android:background="@color/BloodRed"
+        android:onClick="onLocationClick"
+        android:layout_alignStart="@+id/location_button"/>
+</RelativeLayout>

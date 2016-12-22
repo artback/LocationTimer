@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LocationTimer</string>
+    <string name="geofence_enter">Startar tidsräkning:%1$s vid %2$s</string>
+    <string name="geofence_exit">Stoppar tidsräkning: %1$s vid %2$s</string>
+    <string name="geofence_manuellt">Manuellt startad tidsräkning: %1$s vid %2$s</string>
+    <string name="geofence_manuellt_stoped">Manuellt stoppad tidsräkning: %1$s vid %2$s</string>
+    <string name="unknown_geofence_error">okänt fel</string>
+    <string name="new_message">ny händelse</string>
+    <string name="new_messages">nya händelser</string>
+    <string name="Local">Lokal</string>
+    <string name="Location">Lokalisering</string>
+    <string name="enter_place_title">Skriv namn</string>
+    <string name="warningmessage">Är du säker på att du vill ta bort den här Kalendern?</string>
+    <string name="deleteevent">Ta Bort Kalendern</string>
+    <string name="failure" translatable="false">Fel</string>
+    <string name="geofence_not_available">Geofence tjänsten är inte tillgänglig</string>
+    <string name="geofence_too_many_geofences" translatable="false">Appen har registrerat för många geofences</string>
+    <string name="geofence_too_many_pending_intents">För många PendingIntents</string>
+    <string name="loading_address">Laddar Adressen</string>
+    <string name="meters">Meter</string>
+    <string name="place_added">Plats tillagd</string>
+    <string name="waiting_for_location">väntar på lokalisering</string>
+    <string name="geofences_added"></string>
+</resources>
