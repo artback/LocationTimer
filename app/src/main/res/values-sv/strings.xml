@@ -13,13 +13,13 @@
     <string name="enter_place_title">Skriv namn</string>
     <string name="warningmessage">Är du säker på att du vill ta bort den här Kalendern?</string>
     <string name="deleteevent">Ta Bort Kalendern</string>
-    <string name="failure" translatable="false">Fel</string>
+    <string name="failure">Fel</string>
     <string name="geofence_not_available">Geofence tjänsten är inte tillgänglig</string>
-    <string name="geofence_too_many_geofences" translatable="false">Appen har registrerat för många geofences</string>
     <string name="geofence_too_many_pending_intents">För många PendingIntents</string>
     <string name="loading_address">Laddar Adressen</string>
     <string name="meters">Meter</string>
     <string name="place_added">Plats tillagd</string>
     <string name="waiting_for_location">väntar på lokalisering</string>
-    <string name="geofences_added"></string>
+    <string name="geofence_too_many_geofences">Appen har registrerat för många geofences</string>
+    <string name="add_place">lägg till plats</string>
 </resources>

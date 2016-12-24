@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -119,9 +118,10 @@ public class GeolocationService extends Service implements ConnectionCallbacks,
             Log.d("intent","reusing pending intent");
 			return mPendingIntent;
 		} else {
-            Intent intent = new Intent("com.artback.geofence.ACTION_RECEIVE_GEOFENCE");
-            return PendingIntent.getBroadcast(getApplicationContext(), 0, intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
+            // BroadcastReceiver
+            //Intent intent = new Intent("com.artback.geofence.ACTION_RECEIVE_GEOFENCE");
+            Intent intent = new Intent(this, GeofenceReceiver.class);
+            return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		}
 	}
 

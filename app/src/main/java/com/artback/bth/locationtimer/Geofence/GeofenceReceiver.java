@@ -1,7 +1,6 @@
 package com.artback.bth.locationtimer.Geofence;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
@@ -11,17 +10,20 @@ import com.artback.bth.locationtimer.db.GeoFenceLocation;
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
-import com.google.api.services.calendar.model.Event;
 
 import java.util.List;
 
-public class GeofenceReceiver extends BroadcastReceiver{
+public class GeofenceReceiver extends IntentService{
     public static final String TAG= "GeofenceReciver";
     public static final String CATEGORY_LOCATION_SERVICES = "BroadcastGeoIntent" ;
     Intent broadcastIntent = new Intent();
 
+    public GeofenceReceiver() {
+        super("GeofenceReceiver");
+    }
+
     @Override
-    public void onReceive(Context context, Intent intent) {
+        protected void onHandleIntent(Intent intent) {
         broadcastIntent.addCategory(CATEGORY_LOCATION_SERVICES);
 		GeofencingEvent geoEvent = GeofencingEvent.fromIntent(intent);
 		if (geoEvent.hasError()) {
@@ -38,9 +40,8 @@ public class GeofenceReceiver extends BroadcastReceiver{
 				List<com.google.android.gms.location.Geofence> triggerList = geoEvent.getTriggeringGeofences();
 
 				for (Geofence geofence : triggerList) {
-					GeoFenceLocation loc = PlacesApplication.getDatabase(context)
+					GeoFenceLocation loc = PlacesApplication.getDatabase(getApplicationContext())
                             .getPlace(geofence.getRequestId());
-					Event event = null;
 					switch (transitionType) {
                     case Geofence.GEOFENCE_TRANSITION_ENTER:
                         int index = PlacesApplication.mSummaryList.indexOf(loc.getId());
@@ -51,19 +52,21 @@ public class GeofenceReceiver extends BroadcastReceiver{
                         break;
 					case Geofence.GEOFENCE_TRANSITION_DWELL:
                        if (!loc.getTimerStatus() && loc != null ) {
-                            loc.startTimer(context);
-                            GeofenceNotification geofenceNotification = new GeofenceNotification(context);
+                            loc.startTimer(getApplicationContext());
+                            GeofenceNotification geofenceNotification = new GeofenceNotification(getApplicationContext());
                             geofenceNotification.notification(loc, transitionType,System.currentTimeMillis());
                         }
                     break;
 					case Geofence.GEOFENCE_TRANSITION_EXIT:
-                        Intent wakefulIntent = new Intent(context.getApplicationContext(),GoogleCalendarService.class);
+                        Intent wakefulIntent = new Intent(getApplicationContext(),GoogleCalendarService.class);
                         wakefulIntent.putExtra(GoogleCalendarService.INSERT_INTENT,loc.getId());
-                        WakefulIntentService.sendWakefulWork(context,wakefulIntent);
+                        WakefulIntentService.sendWakefulWork(getApplicationContext(),wakefulIntent);
                     break;
 					}
 				}
 			}
 		}
 	}
+
+
 }
