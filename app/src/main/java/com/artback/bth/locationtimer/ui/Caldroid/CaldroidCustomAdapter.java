@@ -1,8 +1,8 @@
 package com.artback.bth.locationtimer.ui.Caldroid;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +20,6 @@ import hirondelle.date4j.DateTime;
 
 public class CaldroidCustomAdapter extends CaldroidGridAdapter {
     private final SimpleDateFormat watchTime = new SimpleDateFormat("HH:mm");
-    private final static long ONE_MINUTE= 60*1000;
     public CaldroidCustomAdapter(Context context, int month, int year,
                                  Map<String, Object> caldroidData,
                                  Map<String, Object> extraData) {
@@ -56,12 +55,11 @@ public class CaldroidCustomAdapter extends CaldroidGridAdapter {
 
 		// Get dateTime of this cell
 		DateTime dateTime = this.datetimeList.get(position);
-		Resources resources = context.getResources();
 
 		// Set color of the dates in previous / next month
 		if (dateTime.getMonth() != month) {
-			tv1.setTextColor(resources
-					.getColor(com.caldroid.R.color.caldroid_darker_gray));
+			tv1.setTextColor(ContextCompat.getColor(context,
+                    com.caldroid.R.color.caldroid_darker_gray));
 		}
         int i=0;
         if(date != null && date.size() > 0) {
@@ -82,7 +80,7 @@ public class CaldroidCustomAdapter extends CaldroidGridAdapter {
 				|| (disableDates != null && disableDates.indexOf(dateTime) != -1)) {
 
 			if (dateTime.equals(getToday())) {
-				cellView.setBackgroundResource(R.drawable.today);
+				cellView.setBackgroundResource(com.caldroid.R.drawable.red_border_dark);
 			}
 
 		} else {
@@ -99,7 +97,7 @@ public class CaldroidCustomAdapter extends CaldroidGridAdapter {
 		if (shouldResetDisabledView && shouldResetSelectedView) {
 			// Customize for today
 			if (dateTime.equals(getToday())) {
-                cellView.setBackgroundResource(R.drawable.today);
+                cellView.setBackgroundResource(com.caldroid.R.drawable.red_border_dark);
             }
 		}
 

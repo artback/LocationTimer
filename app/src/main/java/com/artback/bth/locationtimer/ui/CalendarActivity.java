@@ -6,10 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,8 +17,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.artback.bth.locationtimer.Calendar.CredentialHandler;
 import com.artback.bth.locationtimer.Calendar.GoogleCalendarCollection;
-import com.artback.bth.locationtimer.Calendar.SingleTonService;
 import com.artback.bth.locationtimer.Geofence.GeofenceNotification;
 import com.artback.bth.locationtimer.R;
 import com.artback.bth.locationtimer.app.PlacesApplication;
@@ -44,11 +40,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public class CalendarActivity extends AppCompatActivity {
-    private final String TAG="CalendarActivty";
-
-    //Time Constans
-    private final int THIRTY_SECONDS = 30000;
-    private final int ONE_SECONDS= 1*1000;
 
     //Key for the CaldroidAdapter
     public static final String dateKey= "dateKey";
@@ -66,7 +57,6 @@ public class CalendarActivity extends AppCompatActivity {
     BroadcastReceiver _broadcastReceiver = null;
     private TextView tvTime;
 
-    private boolean undo = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,17 +69,14 @@ public class CalendarActivity extends AppCompatActivity {
         geofenceNotification = new GeofenceNotification(this);
         btn = (ImageButton) findViewById(R.id.my_playbutton);
         if (geofenceLocation != null) {
-            if (geofenceLocation.getTimerStatus()) {
+            if (geofenceLocation.getTimerStatus())
                 btn.setImageResource(R.drawable.ic_pause_white_40dp);
-            }
         }
         TextView t;
         t = (TextView) findViewById(R.id.my_toolbartext);
         t.setText(geofenceLocation.getId());
         tvTime = (TextView) findViewById(R.id.my_time);
         createCaldroid(savedInstanceState);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
     }
 
     public void createCaldroid(Bundle savedInstanceState) {
@@ -106,23 +93,7 @@ public class CalendarActivity extends AppCompatActivity {
                 startActivity(intent);
             }
 
-
-            @Override
-            public void onChangeMonth(int month, int year) {
-                String text = "month: " + month + " year: " + year;
-            }
-
-            @Override
-            public void onLongClickDate(Date date, View view) {
-            }
-
-            @Override
-            public void onCaldroidViewCreated() {
-            }
-
         };
-        final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy");
-        final SimpleDateFormat hourAndMinute = new SimpleDateFormat("H:m");
 
         // Setup caldroid fragment
         // **** If you want normal CaldroidFragment, use below line ****
@@ -151,14 +122,10 @@ public class CalendarActivity extends AppCompatActivity {
             args.putInt(CaldroidFragment.THEME_RESOURCE, com.caldroid.R.style.CaldroidDefaultDark);
             caldroidFragment.setArguments(args);
         }
-
-
         // Attach to the activity
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();
         t.replace(R.id.calendar1, caldroidFragment);
         t.commit();
-
-
     }
 
     @Override
@@ -174,10 +141,12 @@ public class CalendarActivity extends AppCompatActivity {
             _broadcastReceiver = null;
         }
     }
+
     @Override
     protected void onDestroy(){
         super.onDestroy();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -195,36 +164,15 @@ public class CalendarActivity extends AppCompatActivity {
             registerReceiver(_broadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
         }
     }
+
     private long getTimeDifference() {
         Calendar c = Calendar.getInstance();
         TimeZone timeZone = TimeZone.getDefault();
         int offset = timeZone.getOffset( System.currentTimeMillis());
         Date now = c.getTime();
-        long diff = (now.getTime()-geofenceLocation.getStartDate()-offset);
-        return diff;
+        return(now.getTime()-geofenceLocation.getStartDate()-offset);
     }
 
-    private void setCustomResourceForDates() {
-        Calendar cal = Calendar.getInstance();
-
-        // Min date is last 7 days
-        cal.add(Calendar.DATE, -7);
-        Date blueDate = cal.getTime();
-
-        // Max date is next 7 days
-        cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, 7);
-        Date greenDate = cal.getTime();
-
-        if (caldroidFragment != null) {
-            ColorDrawable blue = new ColorDrawable(getResources().getColor(R.color.colorAccent));
-            ColorDrawable green = new ColorDrawable(Color.GREEN);
-            caldroidFragment.setBackgroundDrawableForDate(blue, blueDate);
-            caldroidFragment.setBackgroundDrawableForDate(green, greenDate);
-            caldroidFragment.setTextColorForDate(R.color.colorWhite, blueDate);
-            caldroidFragment.setTextColorForDate(R.color.colorWhite, greenDate);
-        }
-    }
 
     @Override
     protected void onStart() {
@@ -236,7 +184,7 @@ public class CalendarActivity extends AppCompatActivity {
             case R.id.my_playbutton:
                 if (geofenceLocation.getTimerStatus()) {
                     Event event = geofenceLocation.endTimer();
-                    event.setDescription("Manuellt avslutat Event");
+                    event.setDescription("Manuellt avslutat händelse");
                     new GoogleCalendarCollection.InsertEventTask(geofenceLocation, event, this.getApplicationContext()).execute();
                     btn.setImageResource(R.drawable.ic_play_arrow_white_40dp);
                     geofenceLocation.removeTimer(getApplicationContext());
@@ -281,11 +229,12 @@ public class CalendarActivity extends AppCompatActivity {
             time=new ArrayList<>();
             while(!PlacesApplication.initializedCalender){
                 try {
-                    Thread.sleep(ONE_SECONDS);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
+            GoogleCalendarCollection.checkOnlineStatus(CalendarActivity.this);
             try {
                 Events events =getEvents();
                 list = events.getItems();
@@ -310,7 +259,6 @@ public class CalendarActivity extends AppCompatActivity {
             hirondelle.date4j.DateTime startDate = createDateTime(startTime);
             hirondelle.date4j.DateTime endDate = createDateTime(endTime);
             int index = dateList.indexOf(startDate);
-            long remain;
             boolean sameDay = startDate.isSameDayAs(endDate);
             if (!sameDay) {
                 Calendar cal = Calendar.getInstance();
@@ -319,7 +267,6 @@ public class CalendarActivity extends AppCompatActivity {
                 cal.set(Calendar.MINUTE, 59);
                 cal.set(Calendar.SECOND, 59);
                 long noonTime = cal.getTimeInMillis();
-                remain = endTime-noonTime+1000;
                 noonTime = noonTime - startTime;
                 index = dateList.indexOf(startDate);
                 if (index == -1) {
@@ -337,15 +284,14 @@ public class CalendarActivity extends AppCompatActivity {
                 long diff = endTime - startTime;
                 if (index == -1) {
                     dateList.add(endDate);
-                    time.add(Long.valueOf(diff));
+                    time.add(diff);
                 } else {
-                    time.set(index, Long.valueOf(diff) + time.get(index));
+                    time.set(index, diff + time.get(index));
                 }
            }
             if (!sameDay) {
                 insertDate(startTime, endTime);
             }
-            return;
         }
 
         private hirondelle.date4j.DateTime createDateTime(long time){
@@ -354,8 +300,7 @@ public class CalendarActivity extends AppCompatActivity {
             int year = cal.get(Calendar.YEAR);
             int month = cal.get(Calendar.MONTH);
             int day= cal.get(Calendar.DATE);
-            hirondelle.date4j.DateTime date= new hirondelle.date4j.DateTime(year,month+1,day,0,0,0,0);
-            return date;
+            return new hirondelle.date4j.DateTime(year,month+1,day,0,0,0,0);
         }
         @Override
         protected void onPostExecute(Void result) {
@@ -364,34 +309,16 @@ public class CalendarActivity extends AppCompatActivity {
             extraData.put(timeKey,time);
             caldroidFragment.refreshView();
         }
-        private Events getEvents() throws IOException, IOException { // Return
+        private Events getEvents() throws  IOException { // Return
             int index = PlacesApplication.mSummaryList.indexOf(geofenceLocation.getId());
             if (index == -1) {
-                GoogleCalendarCollection.getIdListFromApi();
+                GoogleCalendarCollection.getIdListFromApi(getApplicationContext());
             }
             String calendar = PlacesApplication.mIdList.get(index);
-            Events events = SingleTonService.getInstance().getService().events().list(calendar).setOrderBy("startTime")
+            CredentialHandler credentialHandler = new CredentialHandler(getApplicationContext());
+            return  credentialHandler.getService().events().list(calendar).setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute();
-            return events;
-        }
-        public void checkOnlineStatus() {
-            while (!isDeviceOnline()) {
-                synchronized (this) {
-                    try {
-                        this.wait(THIRTY_SECONDS);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-        }
-        private boolean isDeviceOnline() {
-            ConnectivityManager connMgr =
-                    (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-            return (networkInfo != null && networkInfo.isConnected());
         }
     }
 

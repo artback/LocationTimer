@@ -1,15 +1,12 @@
 package com.artback.bth.locationtimer.ui;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -35,7 +32,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
@@ -59,18 +55,12 @@ public class MapActivity extends AppCompatActivity {
     private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     public static final double RADIUS_OF_EARTH_METERS = 6371009;
     private static final int REQUEST_CHECK_LOCATION_SETTINGS = 101;
-    private SupportMapFragment mGoogleMapFragment = null;
     private GoogleMap mGoogleMap = null;
-    private ImageButton mAddCurrentLocation = null;
-    private Location mCurrentLocation = null;
-    private LatLng addLocation;
     ImageButton searchBtn;
     DraggableCircle circle = null;
     private GoogleApiClient mGoogleApiClient = null;
     private LocationRequest mLocationRequest = null;
-    private boolean isGoogleApiConnected = false;
     private boolean isRequestingLocationUpdates = false;
-    private NavigationView mNavigationView = null;
 
     private class DraggableCircle {
         private final Marker centerMarker;
@@ -78,7 +68,7 @@ public class MapActivity extends AppCompatActivity {
         private final Circle circle;
         private double radius;
 
-        public DraggableCircle(LatLng center, double radius) {
+        private DraggableCircle(LatLng center, double radius) {
             this.radius = radius;
             centerMarker = mGoogleMap.addMarker(new MarkerOptions()
                     .position(center)
@@ -93,22 +83,7 @@ public class MapActivity extends AppCompatActivity {
                     .radius(radius));
         }
 
-        public DraggableCircle(LatLng center, LatLng radiusLatLng) {
-            this.radius = toRadiusMeters(center, radiusLatLng);
-            centerMarker = mGoogleMap.addMarker(new MarkerOptions()
-                    .position(center)
-                    .draggable(true));
-            radiusMarker = mGoogleMap.addMarker(new MarkerOptions()
-                    .position(radiusLatLng)
-                    .draggable(true)
-                    .icon(BitmapDescriptorFactory.defaultMarker(
-                            BitmapDescriptorFactory.HUE_AZURE)));
-            circle = mGoogleMap.addCircle(new CircleOptions()
-                    .center(center)
-                    .radius(radius));
-        }
-
-        public boolean onMarkerMoved(Marker marker) {
+        private boolean onMarkerMoved(Marker marker) {
             if (marker.equals(centerMarker)) {
                 circle.setCenter(marker.getPosition());
                 radiusMarker.setPosition(toRadiusLatLng(marker.getPosition(), radius));
@@ -147,6 +122,7 @@ public class MapActivity extends AppCompatActivity {
 
     private void initViews() {
         setupMapViews();
+        ImageButton mAddCurrentLocation ;
         mAddCurrentLocation = (ImageButton) findViewById(R.id.fabAddCurrentLocation);
         mAddCurrentLocation.setOnClickListener(mOnclickListener);
         searchBtn = (ImageButton) findViewById(R.id.my_searchbutton);
@@ -155,6 +131,7 @@ public class MapActivity extends AppCompatActivity {
 
 
     private void setupMapViews() {
+        SupportMapFragment mGoogleMapFragment ;
         mGoogleMapFragment = SupportMapFragment.newInstance(getMapOptions());
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(R.id.flMapContainer, mGoogleMapFragment);
@@ -191,8 +168,7 @@ public class MapActivity extends AppCompatActivity {
             }
 
             private void onMarkerMoved(Marker marker) {
-                if (circle.onMarkerMoved(marker)) {
-                }
+                circle.onMarkerMoved(marker);
             }
 
         });
@@ -246,7 +222,6 @@ public class MapActivity extends AppCompatActivity {
 
     private void startRequestingLocationUpdates() {
         isRequestingLocationUpdates = true;
-        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -258,7 +233,6 @@ public class MapActivity extends AppCompatActivity {
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, mLocationListener);
         PlacesApplication.showGenericToast(getBaseContext(), getString(R.string.waiting_for_location));
-        updateCurrentLocationOnMap();
     }
 
     private void stopRequestingLocationUpdates() {
@@ -268,19 +242,13 @@ public class MapActivity extends AppCompatActivity {
         }
     }
 
-    private void updateCurrentLocationOnMap() {
-        if (addLocation != null) {
-            mGoogleMap.clear();
-            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(addLocation, 15), 1000, null);
-        }
-    }
 
-    private void onClickAddButton(View clickedView) {
+    private void onClickAddButton() {
         if (circle != null) {
             Intent intent = new Intent(this, AddPlaceActivity.class);
             intent.putExtra(AddPlaceActivity.EXTRA_LAT_LNG, circle.centerMarker.getPosition());
-            Double duoble = Double.valueOf(circle.radius);
-            intent.putExtra(AddPlaceActivity.EXTRA_RADIUS, duoble.intValue());
+            Double circleRadius = circle.radius;
+            intent.putExtra(AddPlaceActivity.EXTRA_RADIUS, circleRadius.intValue());
             startActivity(intent);
         }
     }
@@ -288,9 +256,8 @@ public class MapActivity extends AppCompatActivity {
     private ResultCallback<LocationSettingsResult> mLocationResultCallback = new ResultCallback<LocationSettingsResult>() {
 
         @Override
-        public void onResult(LocationSettingsResult result) {
+        public void onResult(@NonNull LocationSettingsResult result) {
             final Status status = result.getStatus();
-            final LocationSettingsStates states = result.getLocationSettingsStates();
             switch (status.getStatusCode()) {
                 case LocationSettingsStatusCodes.SUCCESS:
                     // All location settings are satisfied. The client can initialize location
@@ -320,7 +287,6 @@ public class MapActivity extends AppCompatActivity {
 
         @Override
         public void onLocationChanged(Location changedLocation) {
-            mCurrentLocation = changedLocation;
         }
     };
 
@@ -330,39 +296,28 @@ public class MapActivity extends AppCompatActivity {
         public void onClick(View clickedView) {
             switch (clickedView.getId()) {
                 case R.id.fabAddCurrentLocation:
-                    onClickAddButton(clickedView);
+                    onClickAddButton();
                     break;
                 case R.id.my_searchbutton:
-                    onClickSearch(clickedView);
+                    onClickSearch();
                 default:
                     break;
             }
         }
     };
 
-    private void onGoogleApiDisabled() {
-        isGoogleApiConnected = false;
-    }
 
-    protected void onClickSearch(View view) {
+    protected void onClickSearch() {
         try {
             Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).build(this);
             startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-        } catch (GooglePlayServicesRepairableException e) {
-            // TODO: Handle the error.
-        } catch (GooglePlayServicesNotAvailableException e) {
-            // TODO: Handle the error.
+        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
         }
     }
 
-    private boolean isDeviceOnline() {
-        ConnectivityManager connMgr =
-                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return (networkInfo != null && networkInfo.isConnected());
-    }
 
-    private void onCheckLocationResult(int resultCode, Intent data) {
+    private void onCheckLocationResult(int resultCode) {
         switch (resultCode) {
             case RESULT_OK:
                 // All required changes were successfully made
@@ -377,29 +332,26 @@ public class MapActivity extends AppCompatActivity {
 
     }
 
-    private void onGoogleApiEnabled(Bundle connectionHint) {
-        isGoogleApiConnected = true;
+    private void onGoogleApiEnabled() {
         checkLocationServiceEnabled();
     }
 
     private OnConnectionFailedListener mConnectionFailedCallback = new OnConnectionFailedListener() {
 
         @Override
-        public void onConnectionFailed(ConnectionResult arg0) {
-            onGoogleApiDisabled();
+        public void onConnectionFailed(@NonNull ConnectionResult arg0) {
         }
     };
     private ConnectionCallbacks mGoogleApiCallback = new ConnectionCallbacks() {
 
         @Override
         public void onConnectionSuspended(int arg0) {
-            onGoogleApiDisabled();
 
         }
 
         @Override
         public void onConnected(Bundle connectionHint) {
-            onGoogleApiEnabled(connectionHint);
+            onGoogleApiEnabled();
             if (ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
@@ -435,7 +387,7 @@ public class MapActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
         case REQUEST_CHECK_LOCATION_SETTINGS:
-            onCheckLocationResult(resultCode,data);
+            onCheckLocationResult(resultCode);
             break;
         case PLACE_AUTOCOMPLETE_REQUEST_CODE:
             if (resultCode == RESULT_OK) {
@@ -445,8 +397,6 @@ public class MapActivity extends AppCompatActivity {
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 Log.i(TAG, status.getStatusMessage());
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
             }
             break;
         }

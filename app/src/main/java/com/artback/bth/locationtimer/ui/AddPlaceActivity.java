@@ -1,14 +1,8 @@
 package com.artback.bth.locationtimer.ui;
-import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -25,7 +19,6 @@ import com.artback.bth.locationtimer.R;
 import com.artback.bth.locationtimer.app.PlacesApplication;
 import com.artback.bth.locationtimer.db.GeoFenceLocation;
 import com.artback.bth.locationtimer.ui.Main.MainActivity;
-import com.google.android.gms.location.Geofence;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
@@ -40,12 +33,9 @@ public class AddPlaceActivity extends AppCompatActivity{
     
 
     private EditText mEdtTitle = null;
-    private Button mBanAddPlace = null;
-    private TextView mEdtRadius = null;
     private String id;
     private LatLng center;
     private int radius;
-    private GeoFenceLocation placeToInsert = null; 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +47,14 @@ public class AddPlaceActivity extends AppCompatActivity{
 
 
     private void initViews() {
+        Button mBanAddPlace;
+        TextView mEdtRadius;
         mEdtTitle = (EditText) findViewById(R.id.edtTitle);
         TextView address = (TextView) findViewById(R.id.txtAddress);
-        if(id != ""){
-           mEdtTitle.setText(id);
+        if(id != null) {
+            if (id.isEmpty()) {
+                mEdtTitle.setText(id);
+            }
         }
         mEdtRadius = (TextView) findViewById(R.id.edtRadius);
         if(radius == 0) {
@@ -70,18 +64,18 @@ public class AddPlaceActivity extends AppCompatActivity{
             address.setVisibility(View.GONE);
         }else{
            mEdtRadius.setText(String.valueOf(radius));
-            String addressLine = getAddress(center).getAddressLine(0);
+            String addressLine = getAddress().getAddressLine(0);
             if(addressLine != null) {
                 address.setText(addressLine);
             }else{
-                address.setText(getAddress(center).getLocality());
+                address.setText(getAddress().getLocality());
             }
         }
         mBanAddPlace = (Button) findViewById(R.id.btnDone);
         mBanAddPlace.setOnClickListener(mOnClickListener);
 
     }
-    public Address getAddress(LatLng latLng) {
+    public Address getAddress() {
         Geocoder geoCoder = new Geocoder(getApplicationContext(), Locale.getDefault());
         List<Address> list = null;
         try {
@@ -89,9 +83,10 @@ public class AddPlaceActivity extends AppCompatActivity{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (list != null & list.size() > 0) {
-            Address address = list.get(0);
-            return address;
+        if (list != null ) {
+            if(list.size() > 0) {
+                return list.get(0);
+            }
         }
         return null;
     }
@@ -146,6 +141,7 @@ public class AddPlaceActivity extends AppCompatActivity{
     }
 
     private GeoFenceLocation getUpdatedPlace() {
+        GeoFenceLocation placeToInsert;
             String id = mEdtTitle.getText().toString().trim();
             if(center != null) {
                 placeToInsert = new GeoFenceLocation(id, center.latitude, center.longitude, radius);
@@ -182,9 +178,6 @@ public class AddPlaceActivity extends AppCompatActivity{
         }
     }
 
-    private GeoFenceLocation getData(Location location, String id,int radius) {
-        return new GeoFenceLocation(id, location.getLatitude(), location.getLongitude(),radius);
-    }
 
     @Override
     protected void onResume() {

@@ -43,7 +43,6 @@ public class GeolocationService extends Service implements ConnectionCallbacks,
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
     private PendingIntent mPendingIntent;
-    private GeofencingRequest.Builder builder;
 
     @Override
     public void onCreate() {
@@ -71,7 +70,6 @@ public class GeolocationService extends Service implements ConnectionCallbacks,
     @Override
     public void onDestroy() {
         super.onDestroy();
-        sendBroadcast(new Intent("YouWillNeverKillMe"));
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
@@ -95,7 +93,6 @@ public class GeolocationService extends Service implements ConnectionCallbacks,
             GeofencingRequest geofencingRequest = geofenceRequestBuilder.build();
             mPendingIntent = requestPendingIntent();
 
-
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG, "Access location not granted");
             }
@@ -105,45 +102,26 @@ public class GeolocationService extends Service implements ConnectionCallbacks,
             geofencesAlreadyRegistered = true;
         }
     }
-    public GeofencingRequest.Builder requestBuilder(){
-       if(builder == null) {
-           builder = new GeofencingRequest.Builder();
-           builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL);
-       }
-        return builder;
-    }
     private PendingIntent requestPendingIntent() {
-
 		if (null != mPendingIntent) {
             Log.d("intent","reusing pending intent");
 			return mPendingIntent;
 		} else {
-            // BroadcastReceiver
-            //Intent intent = new Intent("com.artback.geofence.ACTION_RECEIVE_GEOFENCE");
             Intent intent = new Intent(this, GeofenceReceiver.class);
-            return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		}
 	}
 
-	public void broadcastLocationFound(Location location) {
-		Intent intent = new Intent("com.artback.bth.locationtimer.GeoLocationService");
-		intent.putExtra("latitude", location.getLatitude());
-		intent.putExtra("longitude", location.getLongitude());
-		sendBroadcast(intent);
-	}
 
 	protected void startLocationUpdates() {
 		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
 				!= PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG,"permission Denied");
 		}
 		LocationServices.FusedLocationApi.requestLocationUpdates(
 				mGoogleApiClient, mLocationRequest, this);
 	}
 
-	protected void stopLocationUpdates() {
-		LocationServices.FusedLocationApi.removeLocationUpdates(
-				mGoogleApiClient, this);
-	}
 
 	@Override
 	public void onConnected(Bundle connectionHint) {
@@ -154,14 +132,20 @@ public class GeolocationService extends Service implements ConnectionCallbacks,
 	public void onLocationChanged(Location location) {
         Log.d(TAG, "new location : " + location.getLatitude() + ", "
                   + location.getLongitude() + ". " + location.getAccuracy());
-        if (location.getAccuracy() < 150) {
+        if(location.getAccuracy() < 150 ) {
             broadcastLocationFound(location);
         }
         if (!geofencesAlreadyRegistered) {
             Log.d(TAG, "Starting geofence registering ");
             registerGeofences();
         }
-    }
+  }
+  public void broadcastLocationFound(Location location) {
+    Intent intent = new Intent("com.artback.bth.locationtimer.GeoLocationService");
+    intent.putExtra("latitude", location.getLatitude());
+    intent.putExtra("longitude", location.getLongitude());
+    sendBroadcast(intent);
+  }
 
 	@Override
 	public void onConnectionSuspended(int cause) {
@@ -193,8 +177,7 @@ public class GeolocationService extends Service implements ConnectionCallbacks,
 	}
 
 	public void onResult(@NonNull Status status) {
-		if (status.isSuccess()) {
-		} else {
+		if (!status.isSuccess()) {
 			geofencesAlreadyRegistered = false;
 			String errorMessage = getErrorString(this, status.getStatusCode());
 			Toast.makeText(getApplicationContext(), errorMessage,
@@ -202,7 +185,7 @@ public class GeolocationService extends Service implements ConnectionCallbacks,
 		}
 	}
 
-	public static String getErrorString(Context context, int errorCode) {
+    public static String getErrorString(Context context, int errorCode) {
 		Resources mResources = context.getResources();
 		switch (errorCode) {
 		case GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE:

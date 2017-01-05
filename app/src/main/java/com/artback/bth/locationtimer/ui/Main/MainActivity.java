@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,8 +21,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.artback.bth.locationtimer.Calendar.GoogleCalendarCollection;
+import com.artback.bth.locationtimer.Calendar.CredentialHandler;
 import com.artback.bth.locationtimer.Geofence.GeolocationService;
-import com.artback.bth.locationtimer.Calendar.SingleTonService;
 import com.artback.bth.locationtimer.R;
 import com.artback.bth.locationtimer.app.PlacesApplication;
 import com.artback.bth.locationtimer.db.GeoFenceLocation;
@@ -33,7 +34,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 
-import java.io.IOException;
 import java.util.List;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
@@ -42,10 +42,8 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends Activity  implements EasyPermissions.PermissionCallbacks {
     private static final String TAG = "Main";
-    private LocationAdapter locAdapter=null;
     private List<GeoFenceLocation> myGeofenceSet=null;
-
-    public static final String INSERTED_INTENT="inserted";
+    CredentialHandler credentialHandler ;
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
@@ -60,8 +58,8 @@ public class MainActivity extends Activity  implements EasyPermissions.Permissio
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        credentialHandler = new CredentialHandler(getApplicationContext());
         init();
-        SingleTonService.getInstance().setService(getApplicationContext());
         getResultsFromApi();
     }
 
@@ -76,12 +74,12 @@ public class MainActivity extends Activity  implements EasyPermissions.Permissio
     private void getResultsFromApi() {
         if (! isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
-        } else if (SingleTonService.getInstance().mCredential.getSelectedAccountName() == null) {
+        } else if (credentialHandler.accountName == null) {
             chooseAccount();
         } else if (! isDeviceOnline()) {
             Log.d("network","No network");
         } else {
-                if(PlacesApplication.initializedCalender == false) {
+                if(!PlacesApplication.initializedCalender) {
                     new MakeRequestTask().execute();
                 }
                     startService(new Intent(this, GeolocationService.class));
@@ -93,16 +91,13 @@ public class MainActivity extends Activity  implements EasyPermissions.Permissio
         String[] perms = {Manifest.permission.GET_ACCOUNTS, Manifest.permission.ACCESS_FINE_LOCATION};
         if (EasyPermissions.hasPermissions(
                 this,perms)) {
-            String accountName = getPreferences(Context.MODE_PRIVATE)
-                    .getString(SingleTonService.PREF_ACCOUNT_NAME, null);
-            if (accountName != null) {
-                SingleTonService.getInstance().mCredential.setSelectedAccountName(accountName);
-                getResultsFromApi();
-            } else {
+            if (credentialHandler.accountName == null) {
                 // Start a dialog from which the user can choose an account
                 startActivityForResult(
-                        SingleTonService.getInstance().mCredential.newChooseAccountIntent(),
+                        credentialHandler.mCredential.newChooseAccountIntent(),
                         REQUEST_ACCOUNT_PICKER);
+            } else {
+                getResultsFromApi();
             }
         } else {
             // Request the GET_ACCOUNTS permission via a user dialog
@@ -138,6 +133,7 @@ public class MainActivity extends Activity  implements EasyPermissions.Permissio
      */
 
     private void init() {
+        LocationAdapter locAdapter;
         final RecyclerView locationView;
         RecyclerView.LayoutManager locationLayoutManager;
         myGeofenceSet = MarkMyPlacesDBHelper.getInstance(getApplicationContext()).getMyPlaces();
@@ -191,23 +187,21 @@ public class MainActivity extends Activity  implements EasyPermissions.Permissio
         super.onActivityResult(requestCode, resultCode, data);
         switch(requestCode) {
             case REQUEST_GOOGLE_PLAY_SERVICES:
-                if (resultCode != RESULT_OK) {
-                } else {
+                if (resultCode == RESULT_OK) {
                     getResultsFromApi();
                 }
                 break;
             case REQUEST_ACCOUNT_PICKER:
                 if (resultCode == RESULT_OK && data != null &&
                         data.getExtras() != null) {
-                    String accountName =
-                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
                         SharedPreferences settings =
-                                getPreferences(Context.MODE_PRIVATE);
+                                PreferenceManager.getDefaultSharedPreferences(this);
                         SharedPreferences.Editor editor = settings.edit();
-                        editor.putString(SingleTonService.PREF_ACCOUNT_NAME, accountName);
+                        editor.putString(CredentialHandler.PREF_ACCOUNT_NAME, accountName);
                         editor.apply();
-                        SingleTonService.getInstance().mCredential.setSelectedAccountName(accountName);
+                        credentialHandler = new CredentialHandler(getApplicationContext());
                         getResultsFromApi();
                     }
                 }
@@ -309,19 +303,13 @@ public class MainActivity extends Activity  implements EasyPermissions.Permissio
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                GoogleCalendarCollection.getIdListFromApi();
+                GoogleCalendarCollection.getIdListFromApi(getApplicationContext());
             } catch (Exception e) {
                 mLastError = e;
                 cancel(true);
             }
             return null;
         }
-
-        /**
-         * Fetch a list of the next 10 events from the primary calendar.
-         * @return List of Strings describing returned events.
-         * @throws IOException
-         */
 
 
         @Override

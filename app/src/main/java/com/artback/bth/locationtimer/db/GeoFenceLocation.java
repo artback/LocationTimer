@@ -3,7 +3,6 @@ package com.artback.bth.locationtimer.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.provider.BaseColumns;
 
 import com.artback.bth.locationtimer.app.PlacesApplication;
@@ -12,28 +11,25 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 
-import java.util.Date;
-
 public class GeoFenceLocation {
     
-    public static interface MyPlaceTable {
-        public static final String TABLE_NAME = "places";
-      public static final String CREATE_QUERY = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " ( " +
+    interface MyPlaceTable {
+     String TABLE_NAME = "places";
+     String CREATE_QUERY = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " ( " +
                     MyPlaceColumns._ID + " "            + DBConstants.DB_TYPE_PRIMARY_KEY + "," +
                     MyPlaceColumns.ID + " "          + DBConstants.DB_TYPE_SECONDARY_KEY+ "," +
                     MyPlaceColumns.LATITUDE + " "       + DBConstants.DB_TYPE_REAL + "," +
                     MyPlaceColumns.LONGITUDE + " "      + DBConstants.DB_TYPE_REAL + "," +
                     MyPlaceColumns.START_TIME + " "      + DBConstants.DB_TYPE_REAL + "," +
                     MyPlaceColumns.FENCE_RADIUS + " "   + DBConstants.DB_TYPE_INTEGER + ")" ;
-        public static final String DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_NAME ;
+        String DROP_QUERY = "DROP TABLE IF EXISTS " + TABLE_NAME ;
     }
-    public static interface MyPlaceColumns extends BaseColumns{
-        public static final String ID= "id";
-        public static final String LATITUDE = "latitude";
-        public static final String LONGITUDE = "longitude";
-        public static final String FENCE_RADIUS = "radius";
-        public static final String START_TIME = "start";
-        public static final String[] COLUMN_ALL = {_ID,ID,LATITUDE,LONGITUDE,FENCE_RADIUS,START_TIME};
+    interface MyPlaceColumns extends BaseColumns{
+        String ID= "id";
+        String LATITUDE = "latitude";
+        String LONGITUDE = "longitude";
+        String FENCE_RADIUS = "radius";
+        String START_TIME = "start";
 
     }
     public static final int RADIUS_DEFAULT = 100;
@@ -89,15 +85,6 @@ public class GeoFenceLocation {
                 .setStart(time);
         PlacesApplication.getDatabase(context).updateMyPlace(id,this);
     }
-    public void startTimer(Context context,Date date){
-        DateTime dateTime = new DateTime(date);
-        EventDateTime time = new EventDateTime()
-                .setDateTime(dateTime);
-        event = new Event()
-                .setSummary(id)
-                .setStart(time);
-        PlacesApplication.getDatabase(context).updateMyPlace(id,this);
-    }
     public void removeTimer(Context context){
         startTime = 0;
         event = null;
@@ -110,8 +97,8 @@ public class GeoFenceLocation {
         event.setEnd(time);
         return event;
     }
-    public Event endTimer(Date date){
-        DateTime datetime = new DateTime(date);
+    public Event endTimer(long timeLong){
+        DateTime datetime = new DateTime(timeLong);
         EventDateTime time = new EventDateTime()
                 .setDateTime(datetime);
         event.setEnd(time);
@@ -131,17 +118,11 @@ public class GeoFenceLocation {
     public Event getEvent(){
         return event;
     }
-    public double getLatitude() {
+    private double getLatitude() {
         return latitude;
     }
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-    public double getLongitude() {
+    private  double getLongitude() {
         return longitude;
-    }
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
     }
     public int getRadius() {
         return radius;
@@ -150,7 +131,7 @@ public class GeoFenceLocation {
         this.radius = radius;
     }
 
-    public ContentValues toContentValues() {
+    ContentValues toContentValues() {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MyPlaceColumns.ID, id);
         contentValues.put(MyPlaceColumns.LATITUDE, latitude);
@@ -160,17 +141,13 @@ public class GeoFenceLocation {
         return contentValues;
     }
 
-    public Uri getShareUri(){
-        return Uri.parse("geo:"+ getLatitude() + ","+longitude);
-    }
     public com.google.android.gms.location.Geofence toGeofence() {
-        com.google.android.gms.location.Geofence g = new com.google.android.gms.location.Geofence.Builder()
+        return new com.google.android.gms.location.Geofence.Builder()
                 .setRequestId(getId())
                 .setTransitionTypes(TRANSITION_TYPE)
-                .setNotificationResponsiveness(2*60*1000)
+                .setNotificationResponsiveness(90*1000)
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .setCircularRegion(getLatitude(), getLongitude(), getRadius())
                 .setLoiteringDelay(LOITERING_DELAY).build();
-        return g;
     }
 }

@@ -22,13 +22,13 @@ import static android.content.Context.MODE_PRIVATE;
 public class GeofenceNotification {
 	public static final int MANUALLY_START = 54;
     public static final int MANUALLY_STOP = 55;
-	public static int NOTIFICATION_ID = 1;
+	static int NOTIFICATION_ID = 1;
 	private SharedPreferences sharedPreferences;
 	private SharedPreferences.Editor editor;
     private static Notification.InboxStyle inboxStyle;
     private static int nrOf=1;
     private static String firstMessage;
-	String notificationText = "";
+	private String notificationText = "";
 	private Context context;
 
 	private final SimpleDateFormat _sdfWatchTime = new SimpleDateFormat("HH:mm");
@@ -77,7 +77,7 @@ public class GeofenceNotification {
 	public void notification(GeoFenceLocation loc, int transitionType, long time) {
 		notificationText = getText(loc, transitionType,time);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        Notification notification = null;
+        Notification notification ;
         Notification.Builder builder = new Notification.Builder(context);
 		/**
 		 * Here is the important part!We must check whether notification id inserted inside the shared preferences or no.If inserted IT MEANS THAT WE HAVE an notification
@@ -150,7 +150,6 @@ public class GeofenceNotification {
 
 			Intent intent = new Intent(context, NotificationBroadCastReceiver.class);
 			intent.putExtra("id", NOTIFICATION_ID);
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
             builder.setStyle(inboxStyle);
 
 			editor.putString(String.valueOf(NOTIFICATION_ID), "notification");

@@ -24,7 +24,6 @@ public final class MarkMyPlacesDBHelper extends SQLiteOpenHelper {
     /**
      * method to get helper instance
      * @param context - application context preferable
-     * @return
      */
     public static MarkMyPlacesDBHelper getInstance(Context context) {
         if (mAppDBHelper == null) {
@@ -62,41 +61,34 @@ public final class MarkMyPlacesDBHelper extends SQLiteOpenHelper {
         createTables(db);
     }
 
-    protected long insert(SQLiteDatabase db,String tableName, ContentValues values ){
-        long rowId = -1 ;
-        synchronized (db) {
-            rowId  = db.insert(tableName, null,values);
-        }
-        return rowId ;
-    }
-    protected long insert(String tableName, ContentValues values ){
+    private long insert(String tableName, ContentValues values ){
         SQLiteDatabase writableDB = getWritableDatabase();
-        long rowId = -1 ;
+        long rowId ;
         synchronized (writableDB) {
             rowId  = writableDB.insert(tableName, null,values);
         }
         return rowId ;
     }
-    protected long delete(String tableName, String[] whereArgs ){
+    private long delete(String tableName, String[] whereArgs ){
         SQLiteDatabase writableDB = getWritableDatabase();
-        long rowId = -1 ;
+        long rowId ;
         String whereClause = "id=?";
         synchronized (writableDB) {
             rowId  = writableDB.delete(tableName, whereClause,whereArgs);
         }
         return rowId ;
     }
-    protected Cursor query(String table,String[] columns,String selection,String[] selectionArgs,String groupby,String having,String orderBy){
+    private Cursor query(String table,String[] columns,String selection,String[] selectionArgs,String groupby,String having,String orderBy){
         SQLiteDatabase readableDB = getReadableDatabase();
-        Cursor resultCursor = null ;
+        Cursor resultCursor ;
         synchronized (readableDB) {
             resultCursor = readableDB.query(table, columns, selection, selectionArgs, groupby, having, orderBy);
         }
         return resultCursor ;
     }
-    protected int update(String tableName, ContentValues values, String whereClause, String[] whereArgs){
+    private int update(String tableName, ContentValues values, String whereClause, String[] whereArgs){
         SQLiteDatabase writableDB = getWritableDatabase();
-        int updatedRows = 0 ;
+        int updatedRows ;
         synchronized (writableDB) {
             updatedRows = writableDB.update(tableName, values, whereClause, whereArgs);
         }
@@ -109,44 +101,23 @@ public final class MarkMyPlacesDBHelper extends SQLiteOpenHelper {
     public long insertMyPlace(GeoFenceLocation newGeoFenceLocation){
         return insert(GeoFenceLocation.MyPlaceTable.TABLE_NAME, newGeoFenceLocation.toContentValues());
     }
-    public long insertMyPlace(SQLiteDatabase db ,GeoFenceLocation newGeoFenceLocation){
-        return insert(db,GeoFenceLocation.MyPlaceTable.TABLE_NAME, newGeoFenceLocation.toContentValues());
-    }
-    public boolean updateMyPlace(String Id, GeoFenceLocation newGeoFenceLocation){
+    boolean updateMyPlace(String Id, GeoFenceLocation newGeoFenceLocation){
         String whereClause = GeoFenceLocation.MyPlaceColumns.ID + " = ?" ;
         String[] whereArgs = {Id};
         return update(GeoFenceLocation.MyPlaceTable.TABLE_NAME, newGeoFenceLocation.toContentValues(),whereClause,whereArgs) > 0;
     }
-    public boolean updateMyPlace(int rowId, GeoFenceLocation newGeoFenceLocation){
-        String whereClause = GeoFenceLocation.MyPlaceColumns._ID + " = ?" ;
-        String[] whereArgs = {String.valueOf(rowId)};
-        return update(GeoFenceLocation.MyPlaceTable.TABLE_NAME, newGeoFenceLocation.toContentValues(),whereClause,whereArgs) > 0;
-    }
-    public Cursor queryMyPlacesAll(){
+    private Cursor queryMyPlacesAll(){
         return query(GeoFenceLocation.MyPlaceTable.TABLE_NAME, null, null, null, null, null, null);
     }
-    public Cursor queryMyPlacesGeofence(){
+    private Cursor queryMyPlacesGeofence(){
         String whereClause = GeoFenceLocation.MyPlaceColumns.FENCE_RADIUS+ " > ?" ;
         String[] whereArgs = {" 0 "};
         return query(GeoFenceLocation.MyPlaceTable.TABLE_NAME, null, whereClause, whereArgs, null, null, null);
     }
-    public Cursor queryMyPlace(long rowId){
-        String selection = GeoFenceLocation.MyPlaceColumns._ID +  " = ? " ;
-        String[] selectionArgs = {String.valueOf(rowId)};
-        return query(GeoFenceLocation.MyPlaceTable.TABLE_NAME, null, selection, selectionArgs, null, null, null);
-    }
-    public Cursor queryMyPlace(String id){
+    private Cursor queryMyPlace(String id){
         String selection = GeoFenceLocation.MyPlaceColumns.ID +  " = ? " ;
         String[] selectionArgs = {id};
         return query(GeoFenceLocation.MyPlaceTable.TABLE_NAME, null, selection, selectionArgs, null, null, null);
-    }
-    public GeoFenceLocation getPlace(long rowId) {
-        GeoFenceLocation resultPlace = null;
-        Cursor resultQuery = queryMyPlace(rowId);
-        if (resultQuery.moveToNext()) {
-            resultPlace = new GeoFenceLocation(resultQuery);
-        }
-        return resultPlace;
     }
     public GeoFenceLocation getPlace(String id) {
         GeoFenceLocation resultPlace = null;
@@ -163,8 +134,8 @@ public final class MarkMyPlacesDBHelper extends SQLiteOpenHelper {
     public List<GeoFenceLocation> getMyPlacesToGeofence(){
         return getPlaceListFromCursor(queryMyPlacesGeofence());
     }
-    public List<GeoFenceLocation> getPlaceListFromCursor(Cursor placeCursor){
-        ArrayList<GeoFenceLocation> myPlacesList = new ArrayList<GeoFenceLocation>();
+    private List<GeoFenceLocation> getPlaceListFromCursor(Cursor placeCursor){
+        ArrayList<GeoFenceLocation> myPlacesList = new ArrayList<>();
         if(placeCursor !=null ){
             while(placeCursor.moveToNext()){
                 myPlacesList.add(new GeoFenceLocation(placeCursor));

@@ -13,14 +13,12 @@ import java.util.List;
 
 
 public class PlacesApplication extends Application {
-    public static final String TAG = "PlacesApplication";
-    public static final String initialCalendar="initialCalenderIntent";
     public static final String CALENDER_INTENT="GeoCalendar";
-    public static final String CALENDERNOTIFICATION_INTENT="GeoNotificationCalendar";
     public static boolean initializedCalender=false;
     public static ArrayList<String> mIdList= new ArrayList<>();
     public static ArrayList<String> mSummaryList= new ArrayList<>();
     public volatile static ArrayList<Boolean> trueExitList= new ArrayList<>();
+    public volatile static ArrayList<Boolean> alreadyExitedList = new ArrayList<>();
     private MarkMyPlacesDBHelper mDbHelper = null;
     public static final int MAX_GEOFENCES = 100 ;
 
@@ -39,9 +37,6 @@ public class PlacesApplication extends Application {
        mIdList.remove(mSummaryList.indexOf(geoFenceLocation.getId()));
        mSummaryList.remove(geoFenceLocation.getId());
        PlacesApplication.getDatabase(context).removeMyPlace(geoFenceLocation);
-        if(geoFenceLocation.getRadius() > 0){
-
-        }
     }
     public static void toGoogleCal( GeoFenceLocation geo, Context context){
             new GoogleCalendarCollection.InsertCalenderTask(context).execute(geo.getId());

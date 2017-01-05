@@ -19,7 +19,7 @@
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyC_yOtLx_E1ZQlFqn3LuTccj0cwd3q3fKE" />
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
         <activity
-            android:name="com.artback.bth.locationtimer.ui.Main.MainActivity"
+            android:name=".ui.Main.MainActivity"
             android:screenOrientation="portrait"
             android:label="@string/app_name"
             android:theme="@style/Theme.AppCompat.NoActionBar">
@@ -54,10 +54,7 @@
             android:name="com.artback.bth.locationtimer.Geofence.GeolocationService"
             android:exported="false">
         </service>
-        <service
-            android:name="com.artback.bth.locationtimer.Calendar.GoogleCalendarService"
-            android:exported="false">
-        </service>
+        <service android:name=".Geofence.GeofenceReceiver"/>
         <receiver
             android:name="com.artback.bth.locationtimer.Geofence.AtBootReceiver"
             android:exported="true" >
@@ -69,12 +66,6 @@
         <receiver
             android:name="com.artback.bth.locationtimer.Geofence.NotificationBroadCastReceiver"
             android:exported="false" >
-        </receiver>
-        <receiver android:name="com.artback.bth.locationtimer.Geofence.GeofenceReceiver"
-                  android:exported="false">
-            <intent-filter >
-                <action android:name="com.artback.geofence.ACTION_RECEIVE_GEOFENCE"/>
-            </intent-filter>
         </receiver>
          </application>
 </manifest>

@@ -23,35 +23,42 @@ import java.util.List;
 
 public final class GoogleCalendarCollection {
     private static final int THIRTY_SECONDS= 20*1000;
-    public static final String TAG= "GoogleCalendarService";
+    private static final String TAG= "GoogleCalendarService";
     private static final String FIELDS = "summary";
 
-    public static void getIdListFromApi() throws IOException {
+    public static void getIdListFromApi(Context context) {
         // List the next 10 events from the primary calendar.
-        CalendarList calendarList = SingleTonService.getInstance().getService().calendarList().list().execute();
-        List<CalendarListEntry> items = calendarList.getItems();
-        for (CalendarListEntry entry:items) {
-            PlacesApplication.mIdList.add(entry.getId());
-            PlacesApplication.mSummaryList.add(entry.getSummary());
+        CalendarList calendarList;
+        List<CalendarListEntry> items = null;
+        CredentialHandler credentialHandler = new CredentialHandler(context);
+        try {
+            calendarList = credentialHandler.getService().calendarList().list().execute();
+            items = calendarList.getItems();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(items != null) {
+            for (CalendarListEntry entry : items) {
+                PlacesApplication.mIdList.add(entry.getId());
+                PlacesApplication.mSummaryList.add(entry.getSummary());
+            }
         }
         PlacesApplication.trueExitList = new ArrayList<>(Collections.nCopies(PlacesApplication.mIdList.size(),Boolean.FALSE));
+        PlacesApplication.alreadyExitedList = new ArrayList<>(Collections.nCopies(PlacesApplication.mIdList.size(),Boolean.FALSE));
     }
     @NonNull
     public static Boolean insertEvent(String calenderSummary, Event event, Context context){
-        int index = -1;
+        int index ;
+        CredentialHandler credentialHandler = new CredentialHandler(context);
         index = PlacesApplication.mSummaryList.indexOf(calenderSummary);
         checkOnlineStatus(context);
         if(index == -1){
-            try {
-                getIdListFromApi();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            getIdListFromApi(context);
             index = PlacesApplication.mSummaryList.indexOf(calenderSummary);
         }
         String id = PlacesApplication.mIdList.get(index);
         try {
-            SingleTonService.getInstance().getService().events().insert(id, event).execute();
+            credentialHandler.getService().events().insert(id, event).execute();
             Log.d(TAG, "event is inserted for calender" + id);
         } catch (IOException e) {
             Log.d(TAG, "event is not inserted for calender" + id);
@@ -60,7 +67,6 @@ public final class GoogleCalendarCollection {
         }
         return true;
     }
-
     public static class InsertCalenderTask extends AsyncTask<String,Void,Void> {
         Context context;
         public InsertCalenderTask(Context context){
@@ -77,10 +83,11 @@ public final class GoogleCalendarCollection {
             return null;
         }
         private void insertCalendar(String calendarName,Context context) {
+            CredentialHandler credentialHandler = new CredentialHandler(context);
             Calendar calendar = new Calendar();
             calendar.setSummary(calendarName);
             try {
-                Calendar createdCalendar= SingleTonService.getInstance().getService().calendars()
+                Calendar createdCalendar= credentialHandler.getService().calendars()
                         .insert(calendar).setFields(FIELDS).execute();
                 if(!PlacesApplication.mSummaryList.contains(createdCalendar.getSummary())) {
                     PlacesApplication.mSummaryList.add(createdCalendar.getSummary());
@@ -90,6 +97,7 @@ public final class GoogleCalendarCollection {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                insertCalendar(calendarName,context);
             }
         }
     }
