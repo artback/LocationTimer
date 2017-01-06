@@ -7,7 +7,7 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.2"
-        sha1="42ec86e8d0e4dc1e3db26f0726f4ffd709077f15">
+        sha1="3b252ebd4989eb7980a7c4231af362568dbf975d">
         <dex dex="/home/freak/Code/LocationTimer/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_eee67ab9c34b153c29a021dd14060a0d5784a9d3/classes.dex" />
     </item>
     <item
@@ -153,6 +153,15 @@
         revision="24.0.2"
         sha1="35b5be9bcf3c2e3688890fcd23aa14fdeb4d9623">
         <dex dex="/home/freak/Code/LocationTimer/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_83c643c4b7473df42fbf6f0f322f0ff34f5e9de3/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/home/freak/Code/LocationTimer/app/libs/log.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="24.0.2"
+        sha1="9b93b5e40210d4f76e7045c42bde43c64cc57b69">
+        <dex dex="/home/freak/Code/LocationTimer/app/build/intermediates/transforms/dex/debug/folders/1000/2/log_57d2b8f4a61a0ac3839e1eec6810bf7fbb5af09a/classes.dex" />
     </item>
     <item
         is-multidex="true"

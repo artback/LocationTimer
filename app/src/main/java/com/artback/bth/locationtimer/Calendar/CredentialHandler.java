@@ -16,7 +16,6 @@ import java.util.Arrays;
 
 
 public class CredentialHandler {
-    private static CredentialHandler instance;
     private com.google.api.services.calendar.Calendar mService ;
     public GoogleAccountCredential mCredential;
     public String accountName;

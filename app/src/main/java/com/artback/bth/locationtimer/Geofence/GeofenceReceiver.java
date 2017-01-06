@@ -46,7 +46,8 @@ public class GeofenceReceiver extends IntentService {
                   switch (transitionType) {
                         case Geofence.GEOFENCE_TRANSITION_ENTER:
                             int index = PlacesApplication.mSummaryList.indexOf(loc.getId());
-                            if (index > -1 && PlacesApplication.trueExitList.get(index)) {
+                            if (index > -1 )
+                              if(PlacesApplication.trueExitList.get(index)) {
                                 Log.d(TAG, "true exit reset");
                                 PlacesApplication.trueExitList.set(index, Boolean.FALSE);
                             }
@@ -59,7 +60,14 @@ public class GeofenceReceiver extends IntentService {
                             }
                             break;
                         case Geofence.GEOFENCE_TRANSITION_EXIT:
-                            exit(loc.getId());
+                          final String geoString = loc.getId();
+                            new Thread(new Runnable() {
+                              @Override
+                              public void run() {
+                                GeoFenceLocation geo = PlacesApplication.getDatabase(getApplicationContext()).getPlace(geoString);
+                                exit(geo);
+                              }
+                            }).start();
                             break;
                     }
                 }
@@ -67,14 +75,7 @@ public class GeofenceReceiver extends IntentService {
         }
 
     }
-    private void exit(final String geoString) {
-      //TODO: check over
-        if (!lock) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    lock = true;
-                    GeoFenceLocation geo = PlacesApplication.getDatabase(getApplicationContext()).getPlace(geoString);
+    private synchronized  void exit(GeoFenceLocation geo) {
                     final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
                     wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLock");
                     wakeLock.setReferenceCounted(false);
@@ -83,34 +84,28 @@ public class GeofenceReceiver extends IntentService {
                     long time = System.currentTimeMillis();
                     geo.endTimer(time);
                     try {
-                        Thread.sleep(EXIT_TIMEOUT);
+                      Thread.sleep(EXIT_TIMEOUT);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                      e.printStackTrace();
                     }
                     if (!wakeLock.isHeld()) {
-                        wakeLock.acquire(6 * 60 * 1000);
+                      wakeLock.acquire(6 * 60 * 1000);
                     }
                     if (PlacesApplication.trueExitList.get(index).equals(Boolean.TRUE)) {
-                        Event event = geo.getEvent();
-                        event.setDescription("Automatiskt avslutat Händelse");
-                        GoogleCalendarCollection.insertEvent(geo.getId(), event, getApplicationContext());
-                        if (wakeLock.isHeld()) {
-                            wakeLock.release();
-                        }
-                        if (!geo.getTimerStatus().equals(false)) {
-                            GeofenceNotification geofenceNotification = new GeofenceNotification(getApplicationContext());
-                            geofenceNotification.notification(geo, Geofence.GEOFENCE_TRANSITION_EXIT, time);
-                            PlacesApplication.trueExitList.set(index, Boolean.FALSE);
-                            geo.removeTimer(getApplicationContext());
-                        }
+                      Event event = geo.getEvent();
+                      event.setDescription("Automatiskt avslutat Händelse");
+                      GoogleCalendarCollection.insertEvent(geo.getId(), event, getApplicationContext());
+                      if (wakeLock.isHeld()) {
+                        wakeLock.release();
+                      }
+                      if (!geo.getTimerStatus().equals(false)) {
+                        GeofenceNotification geofenceNotification = new GeofenceNotification(getApplicationContext());
+                        geofenceNotification.notification(geo, Geofence.GEOFENCE_TRANSITION_EXIT, time);
+                        PlacesApplication.trueExitList.set(index, Boolean.FALSE);
+                        geo.removeTimer(getApplicationContext());
+                      }
                     } else {
-                        Log.d(TAG, "event not true outside");
+                      Log.d(TAG, "event not true outside");
                     }
-                    lock = false;
-                }
-            }).start();
-        } else {
-            Log.d(TAG,"Exit locked");
-        }
     }
 }
